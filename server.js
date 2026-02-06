@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { setupDatabase } from './src/config/setupDatabase.js';
 import { logger, securityHeaders } from './src/middlewares/logger.js';
 import { tratarErros, rotaNaoEncontrada } from './src/middlewares/errorHandler.js';
 import petRoutes from './src/routes/petRoutes.js';
@@ -59,27 +60,32 @@ app.use('/api/favoritos', favoritoRoutes);
 app.use(rotaNaoEncontrada);
 app.use(tratarErros);
 
-// Iniciar servidor
-app.listen(PORT, () => {
-  console.log('╔════════════════════════════════════════╗');
-  console.log('║                                        ║');
-  console.log('║      🐾 PetConnect API Server 🐾      ║');
-  console.log('║                                        ║');
-  console.log('╚════════════════════════════════════════╝');
-  console.log('');
-  console.log(`✅ Servidor rodando na porta ${PORT}`);
-  console.log(`🌐 URL: http://localhost:${PORT}`);
-  console.log(`📚 API: http://localhost:${PORT}/api`);
-  console.log('');
-  console.log('📋 Endpoints disponíveis:');
-  console.log(`   - Pets:      http://localhost:${PORT}/api/pets`);
-  console.log(`   - Adotantes: http://localhost:${PORT}/api/adotantes`);
-  console.log(`   - Adoções:   http://localhost:${PORT}/api/adocoes`);
-  console.log(`   - Favoritos: http://localhost:${PORT}/api/favoritos`);
-  console.log('');
-  console.log('💡 Dica: Execute "npm run init-db" para inicializar o banco de dados');
-  console.log('');
-});
+// Inicializar banco de dados e iniciar servidor
+setupDatabase()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log('╔════════════════════════════════════════╗');
+      console.log('║                                        ║');
+      console.log('║      🐾 PetConnect API Server 🐾      ║');
+      console.log('║                                        ║');
+      console.log('╚════════════════════════════════════════╝');
+      console.log('');
+      console.log(`✅ Servidor rodando na porta ${PORT}`);
+      console.log(`🌐 URL: http://localhost:${PORT}`);
+      console.log(`📚 API: http://localhost:${PORT}/api`);
+      console.log('');
+      console.log('📋 Endpoints disponíveis:');
+      console.log(`   - Pets:      http://localhost:${PORT}/api/pets`);
+      console.log(`   - Adotantes: http://localhost:${PORT}/api/adotantes`);
+      console.log(`   - Adoções:   http://localhost:${PORT}/api/adocoes`);
+      console.log(`   - Favoritos: http://localhost:${PORT}/api/favoritos`);
+      console.log('');
+    });
+  })
+  .catch((error) => {
+    console.error('❌ Erro ao inicializar aplicação:', error);
+    process.exit(1);
+  });
 
 // Tratamento de erros não capturados
 process.on('unhandledRejection', (reason, promise) => {
