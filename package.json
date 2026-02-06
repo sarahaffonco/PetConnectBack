@@ -1,0 +1,32 @@
+{
+  "name": "petconnect-backend",
+  "version": "1.0.0",
+  "description": "Backend para o sistema PetConnect - Plataforma de adoção de pets",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "init-db": "node src/config/initDatabase.js"
+  },
+  "keywords": [
+    "pet",
+    "adoption",
+    "api",
+    "express"
+  ],
+  "author": "Sarah",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
+    "express-validator": "^7.3.1",
+    "jsonwebtoken": "^9.0.3",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
