@@ -6,20 +6,20 @@ export const listarFavoritosUsuario = async (req, res) => {
     const { usuarioId } = req.params;
 
     const favoritos = await db.allAsync(`
-      SELECT 
-        f.id, f.usuarioId, f.petId, f.createdAt,
-        p.nome, p.descricao, p.especie, p.raca, p.tamanho, 
+      SELECT
+        f.id, f.adotanteId, f.petId, f.createdAt,
+        p.nome, p.descricao, p.especie, p.raca, p.tamanho,
         p.personalidade, p.dataNascimento, p.status, p.fotoUrl
       FROM favoritos f
       LEFT JOIN pets p ON f.petId = p.id
-      WHERE f.usuarioId = ?
+      WHERE f.adotanteId = ?
       ORDER BY f.createdAt DESC
     `, [usuarioId]);
 
     // Formatar resposta
     const favoritosFormatados = favoritos.map(fav => ({
       id: fav.id,
-      usuarioId: fav.usuarioId,
+      usuarioId: fav.adotanteId, // Mapear adotanteId para usuarioId na resposta
       petId: fav.petId,
       createdAt: fav.createdAt,
       pet: {
@@ -65,21 +65,21 @@ export const adicionarFavorito = async (req, res) => {
     }
 
     // Verificar se já está nos favoritos
-    const favoritoExistente = await db.getAsync('SELECT id FROM favoritos WHERE usuarioId = ? AND petId = ?', [usuarioId, petId]);
+    const favoritoExistente = await db.getAsync('SELECT id FROM favoritos WHERE adotanteId = ? AND petId = ?', [usuarioId, petId]);
     if (favoritoExistente) {
       return res.status(400).json({ erro: 'Pet já está nos favoritos' });
     }
 
     // Adicionar aos favoritos
     const result = await db.runAsync(`
-      INSERT INTO favoritos (usuarioId, petId)
+      INSERT INTO favoritos (adotanteId, petId)
       VALUES (?, ?)
     `, [usuarioId, petId]);
 
     const novoFavorito = await db.getAsync(`
-      SELECT 
-        f.id, f.usuarioId, f.petId, f.createdAt,
-        p.nome, p.descricao, p.especie, p.raca, p.tamanho, 
+      SELECT
+        f.id, f.adotanteId, f.petId, f.createdAt,
+        p.nome, p.descricao, p.especie, p.raca, p.tamanho,
         p.personalidade, p.dataNascimento, p.status, p.fotoUrl
       FROM favoritos f
       LEFT JOIN pets p ON f.petId = p.id
@@ -88,7 +88,7 @@ export const adicionarFavorito = async (req, res) => {
 
     const favoritoFormatado = {
       id: novoFavorito.id,
-      usuarioId: novoFavorito.usuarioId,
+      usuarioId: novoFavorito.adotanteId, // Mapear adotanteId para usuarioId na resposta
       petId: novoFavorito.petId,
       createdAt: novoFavorito.createdAt,
       pet: {
@@ -117,12 +117,12 @@ export const removerFavorito = async (req, res) => {
     const { usuarioId, petId } = req.params;
 
     // Verificar se o favorito existe
-    const favorito = await db.getAsync('SELECT id FROM favoritos WHERE usuarioId = ? AND petId = ?', [usuarioId, petId]);
+    const favorito = await db.getAsync('SELECT id FROM favoritos WHERE adotanteId = ? AND petId = ?', [usuarioId, petId]);
     if (!favorito) {
       return res.status(404).json({ erro: 'Favorito não encontrado' });
     }
 
-    await db.runAsync('DELETE FROM favoritos WHERE usuarioId = ? AND petId = ?', [usuarioId, petId]);
+    await db.runAsync('DELETE FROM favoritos WHERE adotanteId = ? AND petId = ?', [usuarioId, petId]);
 
     res.json({ mensagem: 'Favorito removido com sucesso' });
   } catch (error) {
